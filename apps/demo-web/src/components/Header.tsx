@@ -1,0 +1,128 @@
+import React from 'react';
+import { Shield, Wifi, Server, RefreshCw } from 'lucide-react';
+import type { HealthStatus } from '../services/protection';
+
+interface HeaderProps {
+  mode: 'mock' | 'live';
+  onToggleMode: () => void;
+  health: HealthStatus;
+  onReset: () => void;
+  isScanning: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  mode,
+  onToggleMode,
+  health,
+  onReset,
+  isScanning
+}) => {
+  return (
+    <header style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '16px 24px',
+      borderBottom: '1px solid var(--border-subtle)',
+      background: 'rgba(6, 9, 17, 0.85)',
+      backdropFilter: 'blur(12px)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 50
+    }}>
+      {/* Brand & Team Info */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{
+          width: '42px',
+          height: '42px',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
+        }}>
+          <Shield size={24} color="#ffffff" />
+        </div>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+              AgentGuard
+            </h1>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              background: 'rgba(99, 102, 241, 0.2)',
+              color: '#818cf8',
+              padding: '2px 8px',
+              borderRadius: '6px',
+              border: '1px solid rgba(99, 102, 241, 0.3)'
+            }}>
+              PROTOTYPE v0.1
+            </span>
+          </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Multi-View Prompt-Injection Defense · Saumya (24BRS1065) & Rishabh (24BRS1136)
+          </p>
+        </div>
+      </div>
+
+      {/* Controls & Connection Status */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Backend / Mock Status Indicator */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '6px 12px',
+          borderRadius: '8px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid var(--border-subtle)',
+          fontSize: '0.8rem'
+        }}>
+          <span className={`pulsing-dot ${health.online ? 'online' : 'offline'}`} />
+          <span style={{ color: 'var(--text-secondary)' }}>
+            {mode === 'mock' ? 'Mock Engine (Standalone)' : 'Live AgentGuard API'}
+          </span>
+          {health.latencyMs !== undefined && (
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+              {health.latencyMs}ms
+            </span>
+          )}
+        </div>
+
+        {/* Mode Toggle Switcher */}
+        <button
+          onClick={onToggleMode}
+          className="btn-secondary"
+          title={mode === 'mock' ? 'Switch to Live API Mode' : 'Switch to Offline Mock Mode'}
+          style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+        >
+          {mode === 'mock' ? (
+            <>
+              <Server size={14} />
+              <span>Source: <strong>Mock Fixtures</strong></span>
+            </>
+          ) : (
+            <>
+              <Wifi size={14} />
+              <span>Source: <strong>Live API</strong></span>
+            </>
+          )}
+        </button>
+
+        {/* Reset Demo Button */}
+        <button
+          onClick={onReset}
+          disabled={isScanning}
+          className="btn-secondary"
+          style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+          title="Reset current scenario to initial state"
+        >
+          <RefreshCw size={14} className={isScanning ? 'animate-spin' : ''} />
+          <span>Reset Demo</span>
+        </button>
+      </div>
+    </header>
+  );
+};

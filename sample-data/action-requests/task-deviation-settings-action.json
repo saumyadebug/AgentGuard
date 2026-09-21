@@ -1,0 +1,10 @@
+{
+  "scanId": "task-deviation-004",
+  "userTask": "Display current profile name and notification preferences.",
+  "proposedAction": {
+    "type": "update_backup_email",
+    "label": "Update Backup Recovery Email",
+    "riskCategory": "account_change",
+    "triggeredByFindingIds": ["finding-deviation-01"]
+  }
+}

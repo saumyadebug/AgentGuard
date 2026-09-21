@@ -1,0 +1,7 @@
+{
+  "decision": "allow",
+  "riskScore": 14,
+  "reason": "The proposed form submission action directly executes the user task and accessibility label is benign.",
+  "allowed": true,
+  "confirmationRequired": false
+}

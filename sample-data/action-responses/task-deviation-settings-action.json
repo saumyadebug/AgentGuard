@@ -1,0 +1,7 @@
+{
+  "decision": "confirm",
+  "riskScore": 75,
+  "reason": "Updating security credentials deviates from the user read-only task. Explicit confirmation is required before proceeding.",
+  "allowed": false,
+  "confirmationRequired": true
+}

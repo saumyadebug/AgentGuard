@@ -1,0 +1,9 @@
+{
+  "scanId": "safe-refund-001",
+  "userTask": "Find and summarize the refund policy.",
+  "proposedAction": {
+    "type": "summarize_policy",
+    "label": "Generate Refund Policy Summary",
+    "riskCategory": "general"
+  }
+}

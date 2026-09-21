@@ -1,0 +1,9 @@
+{
+  "scanId": "benign-aria-005",
+  "userTask": "Submit the warranty registration form.",
+  "proposedAction": {
+    "type": "submit_form",
+    "label": "Submit Warranty Registration Form",
+    "riskCategory": "form_submission"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "decision": "block",
+  "riskScore": 92,
+  "reason": "The proposed token transmission action is high-risk, completely unrelated to summarization, and triggered by untrusted visible text.",
+  "allowed": false,
+  "confirmationRequired": false
+}

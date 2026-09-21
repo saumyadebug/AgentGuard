@@ -1,0 +1,7 @@
+{
+  "decision": "allow",
+  "riskScore": 10,
+  "reason": "The proposed summary action directly aligns with the user's task and originates from approved content.",
+  "allowed": true,
+  "confirmationRequired": false
+}

@@ -1,0 +1,18 @@
+{
+  "scanId": "safe-refund-001",
+  "riskScore": 10,
+  "riskLevel": "low",
+  "decision": "allow",
+  "summary": "The webpage contains standard, legitimate customer support terms without prompt overrides or suspicious instructions.",
+  "findings": [],
+  "safeContent": [
+    {
+      "text": "Refunds are accepted within 30 days of delivery with original proof of purchase. Items must be unused and in original packaging. To initiate a return, contact support@shopease.test with your order ID.",
+      "view": "visible_text"
+    }
+  ],
+  "sanitizedContent": [
+    "Refunds are accepted within 30 days of delivery with original proof of purchase. Items must be unused and in original packaging. To initiate a return, contact support@shopease.test with your order ID."
+  ],
+  "blockedContent": []
+}
