@@ -9,12 +9,16 @@ export * from './HttpProtectionService';
 let mockInstance: MockProtectionService | null = null;
 let httpInstance: HttpProtectionService | null = null;
 
+export function getHttpProtectionService(): HttpProtectionService {
+  if (!httpInstance) {
+    httpInstance = new HttpProtectionService();
+  }
+  return httpInstance;
+}
+
 export function getProtectionService(mode: 'mock' | 'live'): IProtectionService {
   if (mode === 'live') {
-    if (!httpInstance) {
-      httpInstance = new HttpProtectionService();
-    }
-    return httpInstance;
+    return getHttpProtectionService();
   }
   
   if (!mockInstance) {
@@ -22,3 +26,4 @@ export function getProtectionService(mode: 'mock' | 'live'): IProtectionService 
   }
   return mockInstance;
 }
+

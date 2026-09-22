@@ -15,6 +15,7 @@ const suites = [
   { name: 'Phase 2 Verification', script: 'verify-phase2.mjs' },
   { name: 'Phase 3 Verification', script: 'verify-phase3.mjs' },
   { name: 'Phase 4 Verification', script: 'verify-phase4.mjs' },
+  { name: 'Phase 5 Verification', script: 'verify-phase5.mjs' },
   { name: 'Contract Parity & Integration', script: 'verify-integration-contract.mjs' }
 ];
 

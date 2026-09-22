@@ -306,11 +306,23 @@ The web application will be crafted with a **modern, high-tech security aestheti
   - Integrated into `package.json` (`npm run verify:phase4`) and master runner `verify-all.mjs` (302/302 checks passing across all 5 suites).
   - Zero-conflict isolation boundaries with Rishabh verified intact.
 
-### Phase 5: Live API Integration & Fallback Resilience (Days 17–20)
-- [ ] Implement `HttpProtectionService` utilizing `fetch` with `VITE_PROTECTION_API_URL`.
-- [ ] Add `/health` ping on page load with latency tracking and dynamic UI badge.
-- [ ] Implement graceful fallback: If Rishabh's API is unreachable, notify the user and offer one-click switch to Mock Fixture Mode.
-- [ ] Add input validation and error toast notifications.
+### Phase 5: Live API Integration & Fallback Resilience (Days 17–20) [COMPLETED]
+- [x] **Subphase 5.1: Resilient HTTP Protection Service Engine**
+  - Implemented `HttpProtectionService.ts` with custom error classes (`ApiConnectionError`, `ApiValidationError`, `ApiServerError`).
+  - Added pre-flight contract validation, configurable timeouts (AbortSignal.timeout), and dynamic runtime endpoint reconfiguration.
+- [x] **Subphase 5.2: Header Telemetry HUD & API Endpoint Config Modal**
+  - Enhanced `Header.tsx` with live LED status, color-coded millisecond latency ticker, and `Settings` button.
+  - Implemented `ApiConfigModal.tsx` allowing interactive endpoint customization, `/health` connection testing, and `localStorage` persistence.
+- [x] **Subphase 5.3: Intelligent Auto-Failover & Offline Fallback Banner**
+  - Built `FallbackAlertBanner.tsx` enforcing Contract Rule 4.4: never assumes unverified pages are safe when backend is offline.
+  - Provides 1-click fallback to offline mock fixtures, retry ping button, and endpoint settings launcher.
+- [x] **Subphase 5.4: Cyber-HUD Tactical Toast Notification System**
+  - Built `ToastContext.tsx` and `ToastContainer.tsx` providing floating, animated tactical security toasts across all actions.
+  - Completely eliminated raw browser `alert()` dialogs in favor of professional telemetry alerts.
+- [x] **Subphase 5.5: Phase 5 Automated Verification Suite**
+  - Created `verify-phase5.mjs` with 40 automated invariant checks.
+  - Integrated into `package.json` (`npm run verify:phase5`) and master runner `verify-all.mjs` (342/342 checks passing across all 6 test suites).
+  - Zero-conflict isolation boundaries with Rishabh verified intact.
 
 ### Phase 6: Testing, Polish & Demo Rehearsal (Days 21–25)
 - [ ] Test the 4-minute presentation flow across all 5 scenarios.

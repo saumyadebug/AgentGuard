@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from './components/Header';
 import { ScenarioSelector } from './components/ScenarioSelector';
 import { TaskInput } from './components/TaskInput';
@@ -9,6 +9,9 @@ import { FindingsList } from './components/FindingsList';
 import { ActionGateCard } from './components/ActionGateCard';
 import { SimulatedAgentTrace } from './components/SimulatedAgentTrace';
 import { ConfirmationModal } from './components/ConfirmationModal';
+import { FallbackAlertBanner } from './components/FallbackAlertBanner';
+import { ToastProvider, useToast } from './components/common/ToastContext';
+import { ToastContainer } from './components/common/ToastContainer';
 
 import { ALL_FIXTURES } from './fixtures/catalog';
 import type { FixtureScenario } from './fixtures/types';
@@ -18,15 +21,18 @@ import type {
   ScanPageRequest, 
   CheckActionRequest 
 } from './types/agentguard-contract';
-import { getProtectionService, type HealthStatus } from './services/protection';
+import { getProtectionService, getHttpProtectionService, type HealthStatus } from './services/protection';
 import { getAgentSimulationService, type AgentSimulationOutcome } from './services/agent';
 import { getExtractor, type ExtractionMode } from './services/extraction';
 import './App.css';
 
-export const App: React.FC = () => {
+const AppDashboard: React.FC = () => {
+  const { showToast } = useToast();
+
   // Mode: Default to 'mock' for 100% offline standalone reliability
   const [mode, setMode] = useState<'mock' | 'live'>('mock');
   const [health, setHealth] = useState<HealthStatus>({ online: true, latencyMs: 8 });
+  const [isRetryingPing, setIsRetryingPing] = useState<boolean>(false);
 
   // Extraction Mode: 'catalog' vs 'live-dom'
   const [extractionMode, setExtractionMode] = useState<ExtractionMode>('catalog');
@@ -48,10 +54,23 @@ export const App: React.FC = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
 
   // Health ping
+  const runPing = useCallback(async () => {
+    setIsRetryingPing(true);
+    try {
+      const service = getProtectionService(mode);
+      const res = await service.checkHealth();
+      setHealth(res);
+    } catch {
+      setHealth({ online: false, message: 'Protection API unreachable' });
+    } finally {
+      setIsRetryingPing(false);
+    }
+  }, [mode]);
+
   useEffect(() => {
     let isMounted = true;
 
-    const runPing = async () => {
+    const executePing = async () => {
       try {
         const service = getProtectionService(mode);
         const res = await service.checkHealth();
@@ -60,14 +79,14 @@ export const App: React.FC = () => {
         }
       } catch {
         if (isMounted) {
-          setHealth({ online: false, message: 'Unreachable' });
+          setHealth({ online: false, message: 'Protection API unreachable' });
         }
       }
     };
 
-    void runPing();
+    void executePing();
     const interval = setInterval(() => {
-      void runPing();
+      void executePing();
     }, 12000);
 
     return () => {
@@ -93,20 +112,75 @@ export const App: React.FC = () => {
     setHasScanRun(false);
     setActionResult(null);
     setAgentTrace(null);
+    showToast({
+      type: 'info',
+      title: 'Demo State Reset',
+      message: `Scenario "${fixture.title}" returned to baseline.`
+    });
   };
 
   // Toggle Mode
   const handleToggleMode = () => {
-    setMode(prev => prev === 'mock' ? 'live' : 'mock');
+    if (mode === 'mock') {
+      setMode('live');
+      showToast({
+        type: 'info',
+        title: 'Switched to Live API Mode',
+        message: `Connecting to ${getHttpProtectionService().getBaseUrl()}...`
+      });
+    } else {
+      setMode('mock');
+      showToast({
+        type: 'info',
+        title: 'Switched to Offline Mock Mode',
+        message: 'Using standalone contract fixture catalog.'
+      });
+    }
+  };
+
+  // Switch specifically to mock
+  const handleSwitchToMock = () => {
+    setMode('mock');
+    showToast({
+      type: 'info',
+      title: 'Switched to Offline Mock Mode',
+      message: 'Using standalone contract fixture catalog.'
+    });
+  };
+
+  // Handle endpoint updated via config modal
+  const handleEndpointUpdated = (newUrl: string) => {
+    showToast({
+      type: 'success',
+      title: 'Endpoint Updated',
+      message: `Targeting AgentGuard API at ${newUrl}`
+    });
+    void runPing();
   };
 
   // Toggle Extraction Mode
   const handleToggleExtractionMode = () => {
-    setExtractionMode(prev => prev === 'catalog' ? 'live-dom' : 'catalog');
+    const next = extractionMode === 'catalog' ? 'live-dom' : 'catalog';
+    setExtractionMode(next);
+    showToast({
+      type: 'info',
+      title: 'Extractor Changed',
+      message: `Active extractor: ${next === 'live-dom' ? 'Live DOM Extractor' : 'Catalog Specification'}`
+    });
   };
 
   // Trigger Scan
   const handleRunScan = async () => {
+    // If in live mode and offline, prompt user
+    if (mode === 'live' && !health.online) {
+      showToast({
+        type: 'error',
+        title: 'Scan Blocked · API Offline',
+        message: 'Live AgentGuard API is unreachable. Switch to Mock mode or start the backend adapter.'
+      });
+      return;
+    }
+
     setIsScanning(true);
     try {
       const service = getProtectionService(mode);
@@ -132,8 +206,18 @@ export const App: React.FC = () => {
       setHasScanRun(true);
       setActionResult(null);
       setAgentTrace(null);
+
+      showToast({
+        type: response.decision === 'block' ? 'warning' : 'success',
+        title: response.decision === 'block' ? 'Scan Flagged Attack' : 'Security Scan Completed',
+        message: `Analyzed 3 views · Score: ${response.riskScore}/100 · Decision: ${response.decision.toUpperCase()}`
+      });
     } catch (err: any) {
-      alert(`Scan failed: ${err.message || 'Error communicating with AgentGuard'}`);
+      showToast({
+        type: 'error',
+        title: 'Scan Execution Failed',
+        message: err.message || 'Error communicating with AgentGuard protection service.'
+      });
     } finally {
       setIsScanning(false);
     }
@@ -167,9 +251,30 @@ export const App: React.FC = () => {
 
       if (response.confirmationRequired) {
         setIsConfirmModalOpen(true);
+        showToast({
+          type: 'warning',
+          title: 'Human Authorization Needed',
+          message: 'Proposed action deviates from stated user goal.'
+        });
+      } else if (!response.allowed) {
+        showToast({
+          type: 'error',
+          title: 'Action Gate: EXPLOIT BLOCKED',
+          message: `${response.reason} (Zero state mutation)`
+        });
+      } else {
+        showToast({
+          type: 'success',
+          title: 'Action Gate: PERMITTED',
+          message: 'Task-aligned browser tool execution approved.'
+        });
       }
     } catch (err: any) {
-      alert(`Action Check failed: ${err.message}`);
+      showToast({
+        type: 'error',
+        title: 'Action Check Failed',
+        message: err.message || 'Error communicating with action gate.'
+      });
     } finally {
       setIsCheckingAction(false);
     }
@@ -192,6 +297,11 @@ export const App: React.FC = () => {
           executionSummary: 'Human authorized action override. Executed safely.'
         });
       }
+      showToast({
+        type: 'success',
+        title: 'Action Authorized by Human Override',
+        message: 'Granted one-time execution permission for this action.'
+      });
     }
   };
 
@@ -203,7 +313,22 @@ export const App: React.FC = () => {
         health={health}
         onReset={handleResetDemo}
         isScanning={isScanning}
+        onEndpointUpdated={handleEndpointUpdated}
       />
+
+      {/* Fallback banner when in Live Mode and API is offline */}
+      {mode === 'live' && !health.online && (
+        <FallbackAlertBanner
+          apiUrl={getHttpProtectionService().getBaseUrl()}
+          onSwitchToMock={handleSwitchToMock}
+          onRetryConnection={runPing}
+          onOpenConfig={() => {
+            const configBtn = document.querySelector('button[title*="Configure Live Protection API"]') as HTMLButtonElement | null;
+            if (configBtn) configBtn.click();
+          }}
+          isRetrying={isRetryingPing}
+        />
+      )}
 
       <main className="dashboard-main">
         {/* Main 3-Column Asymmetric Cockpit Grid */}
@@ -279,8 +404,20 @@ export const App: React.FC = () => {
         onConfirm={handleConfirmAction}
         userTask={userTask}
       />
+
+      {/* Floating Tactical Cyber-Toast Container */}
+      <ToastContainer />
     </div>
   );
 };
 
+export const App: React.FC = () => {
+  return (
+    <ToastProvider>
+      <AppDashboard />
+    </ToastProvider>
+  );
+};
+
 export default App;
+
