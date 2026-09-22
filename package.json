@@ -1,0 +1,16 @@
+{
+  "name": "agentguard",
+  "private": true,
+  "description": "Multi-View Prompt-Injection Protection Layer for LLM Web Agents",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --prefix apps/demo-web run dev",
+    "build": "npm --prefix apps/demo-web run build",
+    "preview": "npm --prefix apps/demo-web run preview",
+    "verify": "npm --prefix apps/demo-web run verify:all",
+    "verify:all": "npm --prefix apps/demo-web run verify:all"
+  }
+}

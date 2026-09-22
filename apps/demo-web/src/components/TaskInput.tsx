@@ -1,5 +1,6 @@
 import React from 'react';
 import { Target, RotateCcw } from 'lucide-react';
+import { DoubleBezelCard } from './common/DoubleBezelCard';
 
 interface TaskInputProps {
   task: string;
@@ -17,22 +18,15 @@ export const TaskInput: React.FC<TaskInputProps> = ({
   const isCustomized = task !== defaultTask;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          color: 'var(--text-secondary)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em'
-        }}>
-          <Target size={14} color="#818cf8" />
+    <DoubleBezelCard
+      headerLeft={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Target size={16} color="#818cf8" />
           <span>User's Original Task</span>
-        </label>
-        {isCustomized && (
+        </div>
+      }
+      headerRight={
+        isCustomized ? (
           <button
             onClick={() => onChange(defaultTask)}
             disabled={disabled}
@@ -40,7 +34,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({
               background: 'none',
               border: 'none',
               color: '#818cf8',
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -50,14 +44,20 @@ export const TaskInput: React.FC<TaskInputProps> = ({
             <RotateCcw size={12} />
             <span>Reset task</span>
           </button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+      innerStyle={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px'
+      }}
+    >
       <textarea
         value={task}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         rows={2}
+        placeholder="Enter user goal for LLM agent..."
         style={{
           width: '100%',
           padding: '10px 12px',
@@ -73,6 +73,8 @@ export const TaskInput: React.FC<TaskInputProps> = ({
           transition: 'border-color 0.2s ease'
         }}
       />
-    </div>
+    </DoubleBezelCard>
   );
 };
+
+export default TaskInput;

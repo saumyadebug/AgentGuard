@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 const suites = [
   { name: 'Phase 1 Verification', script: 'verify-phase1.mjs' },
   { name: 'Phase 2 Verification', script: 'verify-phase2.mjs' },
+  { name: 'Phase 3 Verification', script: 'verify-phase3.mjs' },
   { name: 'Contract Parity & Integration', script: 'verify-integration-contract.mjs' }
 ];
 

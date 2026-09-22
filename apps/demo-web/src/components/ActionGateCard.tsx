@@ -1,5 +1,7 @@
+import React from 'react';
 import type { ProposedAction, CheckActionResponse } from '../types/agentguard-contract';
-import { ShieldAlert, ShieldCheck, PlayCircle, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, PlayCircle, AlertTriangle, Shield } from 'lucide-react';
+import { DoubleBezelCard } from './common/DoubleBezelCard';
 
 interface ActionGateCardProps {
   proposedAction: ProposedAction;
@@ -18,43 +20,53 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
   canCheck,
   onOpenConfirmModal
 }) => {
+  const isHighRisk = proposedAction.riskCategory !== 'general';
+
   return (
-    <div style={{
-      background: 'rgba(255, 255, 255, 0.02)',
-      border: '1px solid var(--border-subtle)',
-      borderRadius: 'var(--radius-md)',
-      padding: '16px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
-          Proposed Agent Action
-        </span>
-        <span style={{
-          fontSize: '0.72rem',
-          padding: '2px 8px',
-          borderRadius: '4px',
-          background: proposedAction.riskCategory === 'general' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.15)',
-          color: proposedAction.riskCategory === 'general' ? '#34d399' : '#f87171',
-          fontWeight: 600
-        }}>
+    <DoubleBezelCard
+      headerLeft={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Shield size={16} color="var(--accent-cyan)" />
+          <span>Proposed Agent Action</span>
+        </div>
+      }
+      headerRight={
+        <span
+          style={{
+            fontSize: '0.7rem',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: !isHighRisk ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            color: !isHighRisk ? '#34d399' : '#f87171',
+            border: `1px solid ${!isHighRisk ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em'
+          }}
+        >
           {proposedAction.riskCategory}
         </span>
-      </div>
-
-      <div style={{
-        background: 'rgba(0, 0, 0, 0.3)',
-        padding: '10px 12px',
-        borderRadius: 'var(--radius-sm)',
-        fontSize: '0.85rem'
-      }}>
-        <div style={{ fontWeight: 600, color: '#f8fafc', marginBottom: '2px' }}>
+      }
+      innerStyle={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px'
+      }}
+    >
+      <div
+        style={{
+          background: 'rgba(0, 0, 0, 0.35)',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          padding: '10px 14px',
+          borderRadius: 'var(--radius-sm)',
+          fontSize: '0.85rem'
+        }}
+      >
+        <div style={{ fontWeight: 600, color: '#f8fafc', marginBottom: '3px' }}>
           {proposedAction.label}
         </div>
-        <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: '#94a3b8' }}>
-          Action Type: {proposedAction.type}()
+        <div style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)', color: '#94a3b8' }}>
+          Action Type: <span style={{ color: '#c7d2fe' }}>{proposedAction.type}()</span>
         </div>
       </div>
 
@@ -65,9 +77,13 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
         className="btn-action"
         style={{
           width: '100%',
-          padding: '10px',
+          padding: '11px',
           fontSize: '0.88rem',
-          background: canCheck ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : undefined
+          background: canCheck ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : undefined,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px'
         }}
       >
         <PlayCircle size={16} />
@@ -76,42 +92,71 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
 
       {!canCheck && (
         <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-          (Requires page scan result first)
+          (Requires page scan verdict before execution check)
         </span>
       )}
 
       {/* Action Check Outcome Banner */}
       {actionResult && (
-        <div style={{
-          marginTop: '4px',
-          padding: '12px',
-          borderRadius: 'var(--radius-sm)',
-          background: actionResult.allowed 
-            ? 'rgba(16, 185, 129, 0.1)' 
-            : (actionResult.confirmationRequired ? 'rgba(139, 92, 246, 0.12)' : 'rgba(239, 68, 68, 0.12)'),
-          border: `1px solid ${actionResult.allowed ? '#10b981' : (actionResult.confirmationRequired ? '#8b5cf6' : '#ef4444')}`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px'
-        }}>
+        <div
+          style={{
+            marginTop: '4px',
+            padding: '12px',
+            borderRadius: 'var(--radius-sm)',
+            background: actionResult.allowed
+              ? 'rgba(16, 185, 129, 0.1)'
+              : actionResult.confirmationRequired
+              ? 'rgba(139, 92, 246, 0.12)'
+              : 'rgba(239, 68, 68, 0.12)',
+            border: `1px solid ${
+              actionResult.allowed
+                ? '#10b981'
+                : actionResult.confirmationRequired
+                ? '#8b5cf6'
+                : '#ef4444'
+            }`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              color: actionResult.allowed ? '#34d399' : (actionResult.confirmationRequired ? '#c084fc' : '#f87171'),
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              {actionResult.allowed ? <ShieldCheck size={16} /> : (actionResult.confirmationRequired ? <AlertTriangle size={16} /> : <ShieldAlert size={16} />)}
-              <span>ACTION GATE VERDICT: {actionResult.decision.toUpperCase()}</span>
+            <span
+              style={{
+                fontWeight: 800,
+                fontSize: '0.82rem',
+                color: actionResult.allowed
+                  ? '#34d399'
+                  : actionResult.confirmationRequired
+                  ? '#c084fc'
+                  : '#f87171',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                letterSpacing: '0.03em'
+              }}
+            >
+              {actionResult.allowed ? (
+                <ShieldCheck size={16} />
+              ) : actionResult.confirmationRequired ? (
+                <AlertTriangle size={16} />
+              ) : (
+                <ShieldAlert size={16} />
+              )}
+              <span>ACTION GATE: {actionResult.decision.toUpperCase()}</span>
             </span>
-            <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+            <span
+              style={{
+                fontSize: '0.74rem',
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--text-secondary)'
+              }}
+            >
               Risk: {actionResult.riskScore}
             </span>
           </div>
 
-          <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.4, margin: 0 }}>
+          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.45, margin: 0 }}>
             {actionResult.reason}
           </p>
 
@@ -135,6 +180,8 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
           )}
         </div>
       )}
-    </div>
+    </DoubleBezelCard>
   );
 };
+
+export default ActionGateCard;
