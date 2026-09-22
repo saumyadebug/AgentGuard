@@ -277,6 +277,7 @@ export const App: React.FC = () => {
         proposedAction={fixture.proposedAction}
         actionResult={actionResult}
         onConfirm={handleConfirmAction}
+        userTask={userTask}
       />
     </div>
   );

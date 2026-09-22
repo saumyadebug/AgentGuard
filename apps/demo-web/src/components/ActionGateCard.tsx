@@ -79,15 +79,30 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
           width: '100%',
           padding: '11px',
           fontSize: '0.88rem',
-          background: canCheck ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : undefined,
+          background: canCheck 
+            ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' 
+            : undefined,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '8px'
+          gap: '8px',
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
         <PlayCircle size={16} />
         <span>{isChecking ? 'Evaluating Action Alignment...' : 'Simulate & Gate Agent Action'}</span>
+        {isChecking && (
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '2px',
+            background: '#38bdf8',
+            animation: 'radar-sweep 1.2s infinite ease-in-out'
+          }} />
+        )}
       </button>
 
       {!canCheck && (
@@ -96,31 +111,44 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
         </span>
       )}
 
+      {/* Checking In-Progress Scanner HUD */}
+      {isChecking && (
+        <div style={{
+          padding: '12px',
+          borderRadius: 'var(--radius-sm)',
+          background: 'rgba(6, 182, 212, 0.08)',
+          border: '1px dashed rgba(6, 182, 212, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '0.78rem',
+          color: '#38bdf8'
+        }}>
+          <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#06b6d4' }} />
+          <span>Intercepting agent action intent... Cross-checking with original user goal.</span>
+        </div>
+      )}
+
       {/* Action Check Outcome Banner */}
-      {actionResult && (
+      {actionResult && !isChecking && (
         <div
-          style={{
+          className={!actionResult.allowed ? 'exploit-barrier-banner' : undefined}
+          style={actionResult.allowed ? {
             marginTop: '4px',
-            padding: '12px',
+            padding: '12px 14px',
             borderRadius: 'var(--radius-sm)',
-            background: actionResult.allowed
-              ? 'rgba(16, 185, 129, 0.1)'
-              : actionResult.confirmationRequired
-              ? 'rgba(139, 92, 246, 0.12)'
-              : 'rgba(239, 68, 68, 0.12)',
-            border: `1px solid ${
-              actionResult.allowed
-                ? '#10b981'
-                : actionResult.confirmationRequired
-                ? '#8b5cf6'
-                : '#ef4444'
-            }`,
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid #10b981',
             display: 'flex',
             flexDirection: 'column',
-            gap: '6px'
+            gap: '8px'
+          } : {
+            marginTop: '4px'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {!actionResult.allowed && <div className="hazard-stripes" />}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
             <span
               style={{
                 fontWeight: 800,
@@ -133,49 +161,85 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                letterSpacing: '0.03em'
+                letterSpacing: '0.04em'
               }}
             >
               {actionResult.allowed ? (
-                <ShieldCheck size={16} />
+                <ShieldCheck size={18} />
               ) : actionResult.confirmationRequired ? (
-                <AlertTriangle size={16} />
+                <AlertTriangle size={18} />
               ) : (
-                <ShieldAlert size={16} />
+                <ShieldAlert size={18} />
               )}
-              <span>ACTION GATE: {actionResult.decision.toUpperCase()}</span>
+              <span>
+                {actionResult.allowed 
+                  ? 'ACTION PERMITTED' 
+                  : (actionResult.confirmationRequired 
+                      ? 'CONFIRMATION REQUIRED' 
+                      : 'EXPLOIT INTERCEPTED & BLOCKED')}
+              </span>
             </span>
+
             <span
               style={{
-                fontSize: '0.74rem',
+                fontSize: '0.72rem',
                 fontFamily: 'var(--font-mono)',
-                color: 'var(--text-secondary)'
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: 'rgba(0, 0, 0, 0.4)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                color: actionResult.riskScore >= 60 ? '#fca5a5' : '#86efac'
               }}
             >
-              Risk: {actionResult.riskScore}
+              Risk: {actionResult.riskScore}/100
             </span>
           </div>
 
-          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.45, margin: 0 }}>
+          <p style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.45, margin: 0 }}>
             {actionResult.reason}
           </p>
+
+          {/* Containment Assurance Guarantee */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.7rem',
+            paddingTop: '6px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            color: 'var(--text-muted)'
+          }}>
+            <span>State Mutation Policy:</span>
+            <span style={{ 
+              color: actionResult.allowed ? '#34d399' : '#f87171',
+              fontWeight: 700,
+              fontFamily: 'var(--font-mono)'
+            }}>
+              {actionResult.allowed ? 'AUTHORIZED EXECUTION' : 'ZERO STATE MUTATION (CONTAINED)'}
+            </span>
+          </div>
 
           {actionResult.confirmationRequired && onOpenConfirmModal && (
             <button
               onClick={onOpenConfirmModal}
               style={{
-                marginTop: '6px',
+                marginTop: '4px',
                 background: 'rgba(139, 92, 246, 0.25)',
                 border: '1px solid #8b5cf6',
                 color: '#e9d5ff',
-                padding: '6px 12px',
+                padding: '8px 12px',
                 borderRadius: '4px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
               }}
             >
-              Review Authorization Request
+              <AlertTriangle size={14} />
+              <span>Review Authorization Request (Human Override)</span>
             </button>
           )}
         </div>

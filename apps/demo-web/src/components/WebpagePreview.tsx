@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { 
   Lock, 
-  Info,
-  Layers,
-  Sparkles
+  Info, 
+  Layers, 
+  Sparkles,
+  Globe
 } from 'lucide-react';
 import type { FixtureScenario } from '../fixtures/types';
 import type { ExtractionMode } from '../services/extraction';
+import { DoubleBezelCard } from './common/DoubleBezelCard';
 import {
   SafeRefundTemplate,
   AriaAttackTemplate,
@@ -38,23 +40,15 @@ export const WebpagePreview: React.FC<WebpagePreviewProps> = ({
   const isBenignAria = fixture.id === 'benign-aria-negative';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <label style={{ 
-          fontSize: '0.8rem', 
-          fontWeight: 600, 
-          color: 'var(--text-secondary)', 
-          textTransform: 'uppercase', 
-          letterSpacing: '0.05em',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
-        }}>
-          <span>Simulated Web Browser Preview</span>
-        </label>
-        
-        {/* Extraction Mode Pill Selector */}
-        {onToggleExtractionMode && (
+    <DoubleBezelCard
+      headerLeft={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Globe size={16} color="#818cf8" />
+          <span>Simulated Web Browser</span>
+        </div>
+      }
+      headerRight={
+        onToggleExtractionMode ? (
           <button
             onClick={onToggleExtractionMode}
             style={{
@@ -76,16 +70,21 @@ export const WebpagePreview: React.FC<WebpagePreviewProps> = ({
             <Layers size={11} />
             <span>Extractor: <strong>{extractionMode === 'live-dom' ? 'Live DOM' : 'Catalog Spec'}</strong></span>
           </button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+      innerStyle={{
+        padding: 0,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
       {/* Browser Chrome Shell */}
       <div style={{
         background: '#0a0f1d',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-md)',
         overflow: 'hidden',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.5)'
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* URL Bar */}
         <div style={{
@@ -167,6 +166,6 @@ export const WebpagePreview: React.FC<WebpagePreviewProps> = ({
           {isBenignAria && <BenignAriaTemplate />}
         </div>
       </div>
-    </div>
+    </DoubleBezelCard>
   );
 };
