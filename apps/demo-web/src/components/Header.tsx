@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Wifi, Server, RefreshCw, Settings } from 'lucide-react';
+import { Shield, Wifi, Server, RefreshCw, Settings, Sparkles } from 'lucide-react';
 import type { HealthStatus } from '../services/protection';
 import { ApiConfigModal } from './ApiConfigModal';
 
@@ -10,6 +10,7 @@ interface HeaderProps {
   onReset: () => void;
   isScanning: boolean;
   onEndpointUpdated?: (newUrl: string) => void;
+  onOpenDemoGuide?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,7 +19,8 @@ export const Header: React.FC<HeaderProps> = ({
   health,
   onReset,
   isScanning,
-  onEndpointUpdated
+  onEndpointUpdated,
+  onOpenDemoGuide
 }) => {
   const [isConfigOpen, setIsConfigOpen] = useState<boolean>(false);
 
@@ -156,6 +158,29 @@ export const Header: React.FC<HeaderProps> = ({
             <RefreshCw size={14} className={isScanning ? 'animate-spin' : ''} />
             <span>Reset Demo</span>
           </button>
+
+          {/* Demo Guide Presentation Button */}
+          {onOpenDemoGuide && (
+            <button
+              onClick={onOpenDemoGuide}
+              className="btn-secondary"
+              style={{
+                fontSize: '0.8rem',
+                padding: '6px 14px',
+                background: 'rgba(99, 102, 241, 0.15)',
+                borderColor: 'rgba(99, 102, 241, 0.4)',
+                color: '#c7d2fe',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 0 12px rgba(99, 102, 241, 0.2)'
+              }}
+              title="Open 4-Minute Presentation Guide (Curated Evaluator Walkthrough)"
+            >
+              <Sparkles size={14} color="#818cf8" />
+              <span>★ Demo Guide</span>
+            </button>
+          )}
         </div>
       </header>
 

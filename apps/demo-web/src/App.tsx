@@ -9,6 +9,7 @@ import { FindingsList } from './components/FindingsList';
 import { ActionGateCard } from './components/ActionGateCard';
 import { SimulatedAgentTrace } from './components/SimulatedAgentTrace';
 import { ConfirmationModal } from './components/ConfirmationModal';
+import { DemoGuideModal } from './components/DemoGuideModal';
 import { FallbackAlertBanner } from './components/FallbackAlertBanner';
 import { ToastProvider, useToast } from './components/common/ToastContext';
 import { ToastContainer } from './components/common/ToastContainer';
@@ -52,6 +53,7 @@ const AppDashboard: React.FC = () => {
   const [isCheckingAction, setIsCheckingAction] = useState<boolean>(false);
   const [agentTrace, setAgentTrace] = useState<AgentSimulationOutcome | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
 
   // Health ping
   const runPing = useCallback(async () => {
@@ -305,6 +307,99 @@ const AppDashboard: React.FC = () => {
     }
   };
 
+  // Launch presentation act from guide
+  const handleSelectAct = (scenarioId: string, customTask?: string) => {
+    const targetFixture = ALL_FIXTURES.find(f => f.id === scenarioId);
+    if (targetFixture) {
+      setFixture(targetFixture);
+      setUserTask(customTask || targetFixture.defaultUserTask);
+      setScanResult(null);
+      setHasScanRun(false);
+      setActionResult(null);
+      setAgentTrace(null);
+      showToast({
+        type: 'info',
+        title: `Act Loaded: ${targetFixture.title}`,
+        message: 'Scenario ready for evaluation. Press [Ctrl + ↵] to scan.'
+      });
+    }
+  };
+
+  // Keep references for latest scan and action check callbacks
+  const runScanRef = useRef(handleRunScan);
+  runScanRef.current = handleRunScan;
+
+  const checkActionRef = useRef(handleCheckAction);
+  checkActionRef.current = handleCheckAction;
+
+  // Global Keyboard Navigation & Presentation Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape closes open modals
+      if (e.key === 'Escape') {
+        if (isGuideOpen) {
+          setIsGuideOpen(false);
+          return;
+        }
+        if (isConfirmModalOpen) {
+          setIsConfirmModalOpen(false);
+          return;
+        }
+      }
+
+      // Check if user is typing in an input/textarea
+      const target = e.target as HTMLElement | null;
+      const isInputFocused = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      );
+
+      // Ctrl+Enter or Cmd+Enter -> Run Page Scan
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (!isScanning) {
+          void runScanRef.current();
+        }
+        return;
+      }
+
+      // Shift+Enter -> Check Action Gate
+      if (e.shiftKey && e.key === 'Enter') {
+        e.preventDefault();
+        if (hasScanRun && !isCheckingAction) {
+          void checkActionRef.current();
+        }
+        return;
+      }
+
+      // Keys 1 - 5 to switch scenarios (only when not typing in an input)
+      if (!isInputFocused && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const num = parseInt(e.key, 10);
+        if (num >= 1 && num <= ALL_FIXTURES.length) {
+          e.preventDefault();
+          const targetFixture = ALL_FIXTURES[num - 1];
+          handleSelectScenario(targetFixture);
+          showToast({
+            type: 'info',
+            title: `Scenario [${num}] Selected`,
+            message: `${targetFixture.title} loaded via keyboard shortcut.`
+          });
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isGuideOpen,
+    isConfirmModalOpen,
+    isScanning,
+    isCheckingAction,
+    hasScanRun,
+    showToast
+  ]);
+
   return (
     <div className="app-container">
       <Header
@@ -314,6 +409,7 @@ const AppDashboard: React.FC = () => {
         onReset={handleResetDemo}
         isScanning={isScanning}
         onEndpointUpdated={handleEndpointUpdated}
+        onOpenDemoGuide={() => setIsGuideOpen(true)}
       />
 
       {/* Fallback banner when in Live Mode and API is offline */}
@@ -403,6 +499,14 @@ const AppDashboard: React.FC = () => {
         actionResult={actionResult}
         onConfirm={handleConfirmAction}
         userTask={userTask}
+      />
+
+      {/* 4-Minute Presentation Guide Modal */}
+      <DemoGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        onSelectAct={handleSelectAct}
+        fixtures={ALL_FIXTURES}
       />
 
       {/* Floating Tactical Cyber-Toast Container */}

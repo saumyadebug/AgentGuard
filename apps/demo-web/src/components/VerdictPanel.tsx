@@ -158,6 +158,7 @@ export const VerdictPanel: React.FC<VerdictPanelProps> = ({
           <>
             <Play size={18} fill="currentColor" />
             <span>{hasScanRun ? 'Re-Scan Page' : 'Run AgentGuard Scan'}</span>
+            <kbd className="kbd-shortcut-hint" style={{ marginLeft: 'auto' }}>Ctrl + ↵</kbd>
           </>
         )}
       </button>

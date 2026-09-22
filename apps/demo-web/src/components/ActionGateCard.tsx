@@ -92,6 +92,9 @@ export const ActionGateCard: React.FC<ActionGateCardProps> = ({
       >
         <PlayCircle size={16} />
         <span>{isChecking ? 'Evaluating Action Alignment...' : 'Simulate & Gate Agent Action'}</span>
+        {canCheck && !isChecking && (
+          <kbd className="kbd-shortcut-hint" style={{ marginLeft: 'auto' }}>Shift + ↵</kbd>
+        )}
         {isChecking && (
           <div style={{
             position: 'absolute',

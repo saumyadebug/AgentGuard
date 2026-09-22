@@ -12,6 +12,7 @@
     "verify:phase3": "node scripts/verify-phase3.mjs",
     "verify:phase4": "node scripts/verify-phase4.mjs",
     "verify:phase5": "node scripts/verify-phase5.mjs",
+    "verify:phase6": "node scripts/verify-phase6.mjs",
     "verify:contract": "node scripts/verify-integration-contract.mjs",
     "verify:all": "node scripts/verify-all.mjs"
   },

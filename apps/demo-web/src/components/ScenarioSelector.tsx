@@ -57,9 +57,9 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)'
         }}
       >
-        {ALL_FIXTURES.map(fixture => (
+        {ALL_FIXTURES.map((fixture, idx) => (
           <option key={fixture.id} value={fixture.id} style={{ background: '#0f172a', color: '#ffffff' }}>
-            {fixture.id === 'aria-injection' ? '★ ' : ''}{fixture.title} ({fixture.category})
+            [{idx + 1}] {fixture.id === 'aria-injection' ? '★ ' : ''}{fixture.title} ({fixture.category})
           </option>
         ))}
       </select>
@@ -83,6 +83,20 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           </div>
         )}
         {currentFixture.description}
+        <div style={{ 
+          fontSize: '0.7rem', 
+          color: 'var(--text-muted)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '5px', 
+          marginTop: '6px',
+          borderTop: '1px dashed var(--border-subtle)',
+          paddingTop: '6px'
+        }}>
+          <span>Shortcut:</span> 
+          <kbd className="kbd-shortcut-hint">1</kbd>–<kbd className="kbd-shortcut-hint">5</kbd> 
+          <span>switches scenario</span>
+        </div>
       </div>
     </DoubleBezelCard>
   );
